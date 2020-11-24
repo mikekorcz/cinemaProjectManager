@@ -1,5 +1,5 @@
 package cinema;
-
+import java.text.NumberFormat;
 import java.util.Scanner;
 
 public class Cinema {
@@ -12,6 +12,10 @@ public class Cinema {
     private static final char SEAT = 'S';
     private static final char BUSY = 'B';
 
+    private static int numberOfPurchasedTickets;
+    private static int currentIncome;
+    private static int totalIncome;
+
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -22,6 +26,7 @@ public class Cinema {
             System.out.println();
             System.out.println("1. Show the seats");
             System.out.println("2. Buy a ticket");
+            System.out.println("3. Statistics");
             System.out.println("0. Exit");
             command = scanner.nextInt();
             System.out.println();
@@ -31,6 +36,9 @@ public class Cinema {
                     break;
                 case 2:
                     takeTicket(cinemaTheatre);
+                    break;
+                case 3:
+                    showStatistics(cinemaTheatre);
                     break;
                 case 0:
                     break;
@@ -51,6 +59,16 @@ public class Cinema {
             for (int j = 0; j < numberOfSeats; j++) {
                 cinemaTheatre[i][j] = SEAT;
             }
+        }
+
+        int totalNumOfSeats = cinemaTheatre.length * cinemaTheatre[0].length;
+        if (totalNumOfSeats <= 60) {
+            totalIncome = totalNumOfSeats * normalTicketPrice;
+        } else {
+            int frontHalfOfRows = cinemaTheatre.length / 2;
+            int totalFrontHalf = frontHalfOfRows * cinemaTheatre[0].length * ticketPriceFrontHalf;
+            int totalBackHalf = (cinemaTheatre.length - frontHalfOfRows) * cinemaTheatre[0].length * ticketPriceBackHalf;
+            totalIncome = totalFrontHalf + totalBackHalf;
         }
     }
 
@@ -73,15 +91,30 @@ public class Cinema {
     public static void takeTicket(char[][] cinemaTheatre) {
         int totalNumberOfSeats = cinemaTheatre.length * cinemaTheatre[0].length;
 
-        System.out.println("Enter a row number:");
-        int seatRow = scanner.nextInt();
-        System.out.println("Enter a seat number in that row:");
-        int seatNumber = scanner.nextInt();
+        int seatRow;
+        int seatNumber;
+
+        while (true) {
+            System.out.println("Enter a row number:");
+            seatRow = scanner.nextInt();
+            System.out.println("Enter a seat number in that row:");
+            seatNumber = scanner.nextInt();
+            if (seatRow > cinemaTheatre.length || seatNumber > cinemaTheatre[0].length) {
+                System.out.println("Wrong input!");
+            } else {
+                if (cinemaTheatre[seatRow - 1][seatNumber - 1] == BUSY) {
+                    System.out.println("That ticket has already been purchased!");
+                } else {
+                    break;
+                }
+            }
+        }
 
         int priceTicket;
 
         if (totalNumberOfSeats <= 60) {
             priceTicket = normalTicketPrice;
+            totalIncome = totalNumberOfSeats * priceTicket;
         } else {
             int frontHalfOfRows = cinemaTheatre.length / 2;
             if (seatRow <= frontHalfOfRows) {
@@ -91,7 +124,21 @@ public class Cinema {
             }
         }
 
+        currentIncome += priceTicket;
+        numberOfPurchasedTickets++;
+
         System.out.println("Ticket price: $" + priceTicket);
         cinemaTheatre[seatRow - 1][seatNumber - 1] = BUSY;
+    }
+
+    private static void showStatistics(char[][] cinemaTheatre) {
+
+        float totalNumOfSeats = cinemaTheatre.length * cinemaTheatre[0].length;
+        float percentageOfPurchased = 100 / totalNumOfSeats * numberOfPurchasedTickets;
+
+        System.out.println("Number of purchased tickets: " + numberOfPurchasedTickets);
+        System.out.printf("Percentage: %.2f%s%n", percentageOfPurchased, "%");
+        System.out.println("Current income: $" + currentIncome);
+        System.out.println("Total income: $" + totalIncome);
     }
 }
